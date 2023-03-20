@@ -113,8 +113,12 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
 
     @SuppressLint("RestrictedApi")
     private void recordVideo() {
+        //El video es guardara en el directori segons les variables d'entorn
         if (videoCapture != null) {
-            File vidDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File vidDir = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                vidDir = getExternalFilesDir(Environment.DIRECTORY_RECORDINGS);
+            }
 
             if (!vidDir.exists()) {
                 vidDir.mkdir();
@@ -125,6 +129,7 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
 
             File vidFile = new File(vidFilePath);
 
+            //checkPerms
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -155,6 +160,8 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
 
 
     private void capturePhoto() {
+        //La foto es guardara en el directori segons les variables d'entorn
+        //File photoDir = new File("/storage/emulated/0/Pictures");
         File photoDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         if (!photoDir.exists()) {
@@ -165,15 +172,18 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
         String photoFilePath = photoDir.getAbsolutePath() + "/" + timestamp + ".jpg";
         File photoFile = new File(photoFilePath);
 
+        //fa la foto
         imageCapture.takePicture(
                 new ImageCapture.OutputFileOptions.Builder(photoFile).build(),
                 getExecutor(),
                 new ImageCapture.OnImageSavedCallback() {
+                    //si la guarda:
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         Toast.makeText(Fotos.this, "Photo saved", Toast.LENGTH_SHORT).show();
                     }
 
+                    //si dona error:
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         Log.d("aaaaaaaaa",exception.getMessage());
