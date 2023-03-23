@@ -15,9 +15,14 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +31,10 @@ import android.widget.Toast;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.net.URI;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -129,6 +138,17 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
 
             File vidFile = new File(vidFilePath);
 
+            //Uri test = Uri.parse(vidFilePath);
+
+            // Agrega la foto a la galería de medios
+            //ContentResolver resolver = getContentResolver();
+            //ContentValues values = new ContentValues();
+            //values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+            //values.put(MediaStore.Images.Media.MIME_TYPE, "video/mp4");
+            //values.put(MediaStore.MediaColumns.DATA, String.valueOf(test));
+            //values.put(MediaStore.Images.Media.IS_PENDING,0);
+            //getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
             //checkPerms
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -158,12 +178,10 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
         }
     }
 
-
     private void capturePhoto() {
-        //La foto es guardara en el directori segons les variables d'entorn
-        //File photoDir = new File("/storage/emulated/0/Pictures");
+        // La foto es guardará en el directorio segons les variables d'entorn
+        // File photoDir = new File("/storage/emulated/0/Pictures");
         File photoDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
         if (!photoDir.exists()) {
             photoDir.mkdir();
         }
@@ -171,27 +189,37 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
         String timestamp = String.valueOf(date.getTime());
         String photoFilePath = photoDir.getAbsolutePath() + "/" + timestamp + ".jpg";
         File photoFile = new File(photoFilePath);
+        Uri test = Uri.parse(photoFilePath);
 
-        //fa la foto
+        // Agrega la foto a la galería de medios
+        ContentResolver resolver = getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.MediaColumns.DATA, String.valueOf(test));
+        values.put(MediaStore.Images.Media.IS_PENDING,0);
+        getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        // Hace la foto
         imageCapture.takePicture(
-                new ImageCapture.OutputFileOptions.Builder(photoFile).build(),
+                new ImageCapture.OutputFileOptions.Builder(resolver,MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values).build(),
                 getExecutor(),
                 new ImageCapture.OnImageSavedCallback() {
-                    //si la guarda:
+                    // Si la guarda:
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+
                         Toast.makeText(Fotos.this, "Photo saved", Toast.LENGTH_SHORT).show();
                     }
 
-                    //si dona error:
+                    // Si da error:
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         Log.d("aaaaaaaaa",exception.getMessage());
                         Toast.makeText(Fotos.this, "Error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-
                     }
                 }
         );
     }
+
 
     }
