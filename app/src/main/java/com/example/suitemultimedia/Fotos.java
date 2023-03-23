@@ -138,11 +138,16 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
 
             File vidFile = new File(vidFilePath);
 
-            //Uri test = Uri.parse(vidFilePath);
+            Uri test = Uri.parse(vidFilePath);
 
             // Agrega la foto a la galería de medios
-            //ContentResolver resolver = getContentResolver();
-            //ContentValues values = new ContentValues();
+            ContentResolver resolver = getContentResolver();
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Video.Media.DATE_TAKEN,System.currentTimeMillis());
+            values.put(MediaStore.Video.Media.MIME_TYPE,"video/mp4");
+            values.put(MediaStore.Video.Media.DATA,String.valueOf(test));
+            values.put(MediaStore.Video.Media.IS_PENDING,0);
+            getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,values);
             //values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
             //values.put(MediaStore.Images.Media.MIME_TYPE, "video/mp4");
             //values.put(MediaStore.MediaColumns.DATA, String.valueOf(test));
@@ -161,7 +166,7 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
                 return;
             }
             videoCapture.startRecording(
-                    new VideoCapture.OutputFileOptions.Builder(vidFile).build(),
+                    new VideoCapture.OutputFileOptions.Builder(resolver,MediaStore.Video.Media.EXTERNAL_CONTENT_URI,values).build(),
                     getExecutor(),
                     new VideoCapture.OnVideoSavedCallback() {
                         @Override
