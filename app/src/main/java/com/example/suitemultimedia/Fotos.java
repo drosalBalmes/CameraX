@@ -220,6 +220,4 @@ public class Fotos extends AppCompatActivity implements View.OnClickListener {
                 }
         );
     }
-
-
     }
